@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hand Sign Detection</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+      }
+      #video {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
+      #results {
+        font-size: 20px;
+        color: #333;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      button {
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #007bff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hand Sign Detection from Video</h1>
+    <button id="startCamera">Turn On Camera</button>
+    <video
+      id="video"
+      width="640"
+      height="480"
+      autoplay
+      style="display: none"
+    ></video>
+    <canvas id="canvas" width="640" height="480" style="display: none"></canvas>
+    <div id="results">Results will appear here...</div>
+
+    <script>
+      const video = document.getElementById("video");
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      const results = document.getElementById("results");
+      const startCameraButton = document.getElementById("startCamera");
+
+      startCameraButton.addEventListener("click", function () {
+        navigator.mediaDevices
+          .getUserMedia({ video: true })
+          .then((stream) => {
+            video.srcObject = stream;
+            video.style.display = "block";
+            this.style.display = "none";
+          })
+          .catch(console.error);
+
+        setInterval(() => {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            const formData = new FormData();
+            formData.append("image", blob, "frame.jpg");
+            fetch("/process-image", {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                results.innerHTML = `Result: ${data.result}`;
+              })
+              .catch(console.error);
+          }, "image/jpeg");
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>
