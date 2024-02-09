@@ -86,10 +86,15 @@
               .then((response) => response.json())
               .then((data) => {
                 results.innerHTML = `Result: ${data.result}`;
+
+                if (data.result !== "No gesture detected") {
+                  voice = new SpeechSynthesisUtterance(data.result);
+                  window.speechSynthesis.speak(voice);
+                }
               })
               .catch(console.error);
           }, "image/jpeg");
-        }, 1000);
+        }, 2000);
       });
     </script>
   </body>
