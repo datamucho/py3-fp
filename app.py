@@ -48,8 +48,6 @@ def process_with_model(image_file):
         else:
             className = "Error in reshaping landmarks"
 
-
-
     return className or "No gesture detected"
 
 @app.route('/process-image', methods=['POST'])
